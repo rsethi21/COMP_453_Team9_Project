@@ -15,7 +15,7 @@ def home():
     assignments = Works_On.query.join(Employee, Works_On.essn == Employee.ssn)\
                   .add_columns(Works_On.pno, Works_On.essn, Employee.ssn, Employee.lname, Employee.fname)\
                   .join(Project, Project.pnumber == Works_On.pno).add_columns(Project.pname)
-    return render_template('assign_home.html', outString = assignments)
+    return render_template('assign_home.html', outString=assignments)
 
    
 @app.route("/join")
@@ -26,6 +26,10 @@ def join():
                .join(Project,Project.pnumber == Works_On.pno).add_columns(Works_On.pno)
     return render_template('join.html', title='Join', joined_m_n=results2)
 
+@app.route("/search")
+@login_required
+def searchLoggedIn():
+    return render_template("searchLoggedIn.html")
 
 @app.route("/assign/<essn>/<pno>")
 @login_required
