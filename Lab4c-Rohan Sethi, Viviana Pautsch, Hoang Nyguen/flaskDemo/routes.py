@@ -31,6 +31,11 @@ def join():
 def searchLoggedIn():
     return render_template("searchLoggedIn.html")
 
+@app.route("/searchResult")
+@login_required
+def searchResult():
+    return render_template("searchResult.html")
+
 @app.route("/assign/<essn>/<pno>")
 @login_required
 def assign(essn, pno):
