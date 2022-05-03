@@ -1,11 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>RESULT</title>
-    <h2>THIS IS YOUR SEARCH RESULT</h2>
-</head>
-<body>
-
-</body>
-</html>
+{% extends "layout.html" %}
+{% block content %}
+	  {% for row in joined_m_n %}
+        <article class="media content-section">
+          <div class="media-body">
+            <div class="article-metadata">
+              <a class="mr-2" href="{{ url_for('searchLoggedIn')}}">{{ row }}</a> <br/>
+              <small class="text-muted">{{ row['lastname'] }} {{ row['firstname'] }}</small>
+            </div>
+          </div>
+        </article>
+     {% endfor %}
+{% endblock content %}
