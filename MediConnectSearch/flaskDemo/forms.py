@@ -3,7 +3,7 @@ from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField, DateField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError,Regexp
-from flaskDemo.models import Doctor, Patient
+from flaskDemo.models import Doctor, Patient, Person
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from flaskDemo import db
 # from flaskDemo.models import User, Department, getDepartment, getDepartmentFactory, Employee, Works_On, Project
@@ -38,29 +38,29 @@ from flaskDemo import db
 #     results3.append(rowDict)
 # project_Choices =sorted( [(row['pnumber'], row['pnumber']) for row in results3])
 
-doctor_specialties = Doctor.query.with_entities(Doctor.specialty).distinct()
+doctor_specialties = Doctor.query.with_entities(Doctor.Specialty).distinct()
 results = list()
 for row in doctor_specialties:
     rowDict = row._asdict()
     results.append(rowDict)
 specialty_Choices =sorted( [(row['specialty']) for row in results])
 
-language = Doctor.query.with_entities(Doctor.language).distinct()
-results = list()
+language = Person.query.with_entities(Person.Language).distinct()
+results2 = list()
 for row in language:
     rowDict = row._asdict()
-    results.append(rowDict)
-language_Choices =sorted( [(row['specialty']) for row in results])
+    results2.append(rowDict)
+language_Choices =sorted( [(row['language']) for row in results2])
 
-locations = Doctor.query.with_entities(Doctor.location).distinct()
-results = list()
+locations = Doctor.query.with_entities(Doctor.CityOfPractice).distinct()
+results3 = list()
 for row in locations:
     rowDict = row._asdict()
-    results.append(rowDict)
-location_Choices =sorted( [(row['specialty']) for row in results])
+    results3.append(rowDict)
+location_Choices =sorted( [(row['locations']) for row in results3])
 
 
-
+"""
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username',
@@ -110,7 +110,7 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('That email is taken. Please choose a different one.')
-
+"""
 
 class SearchForm(FlaskForm):
     specialty = SelectField("Doctor Specialty", choices=specialty_Choices, validators=[DataRequired()])
