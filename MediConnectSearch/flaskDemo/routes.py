@@ -25,7 +25,7 @@ def searchLoggedIn():
         .filter_by(form.Specialty == Doctor.Specialty, form.Language == Person.Language, form.Location == Doctor.CityOfPractice) \
         .add_columns(Person.Firstname, Person.Lastname)
         flash('Redirecting you to Search Results!', 'success')
-        return render_template('searchResult.html', title='Providers that Mathc your Search', joined_m_n=results2)
+        return render_template('searchResult.html', title='Providers that Match your Search', joined_m_n=results2)
     return render_template('searchLoggedIn.html', title='Provider Search Criteria', form=form)
     
 
