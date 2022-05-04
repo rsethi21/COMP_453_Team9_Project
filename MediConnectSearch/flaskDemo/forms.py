@@ -3,74 +3,47 @@ from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField, DateField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError,Regexp
-from flaskDemo.models import Doctor, Patient, Person
+from flaskDemo.models import User, Doctor, Patient
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from flaskDemo import db
-# from flaskDemo.models import User, Department, getDepartment, getDepartmentFactory, Employee, Works_On, Project
-
 # from wtforms.fields.html5 import DateField
 
-# ssns = Department.query.with_entities(Department.mgr_ssn).distinct()
-# #  or could have used ssns = db.session.query(Department.mgr_ssn).distinct()
-# # for that way, we would have imported db from flaskDemo, see above
-#
-# myChoices2 = [(row[0],row[0]) for row in ssns]  # change
-# results=list()
-# for row in ssns:
-#     rowDict=row._asdict()
-#     results.append(rowDict)
-# myChoices = [(row['mgr_ssn']) for row in results]
-# regex1='^((((19|20)(([02468][048])|([13579][26]))-02-29))|((20[0-9][0-9])|(19[0-9][0-9]))-((((0[1-9])'
-# regex2='|(1[0-2]))-((0[1-9])|(1\d)|(2[0-8])))|((((0[13578])|(1[02]))-31)|(((0[1,3-9])|(1[0-2]))-(29|30)))))$'
-# regex=regex1 + regex2
-
-# emp_ssns = Employee.query.with_entities(Employee.ssn)
-# results2 = list()
-# for row in emp_ssns:
-#     rowDict = row._asdict()
-#     results2.append(rowDict)
-# emp_Choices =sorted( [(row['ssn']) for row in results2])
-#
-# projects = Project.query.with_entities(Project.pnumber)
-# results3 = list()
-# for row in projects:
-#     rowDict = row._asdict()
-#     results3.append(rowDict)
-# project_Choices =sorted( [(row['pnumber'], row['pnumber']) for row in results3])
 
 doctor_specialties = Doctor.query.with_entities(Doctor.Specialty).distinct()
 results = list()
 for row in doctor_specialties:
     rowDict = row._asdict()
     results.append(rowDict)
-specialty_Choices =sorted( [(row['specialty']) for row in results])
+specialty_Choices = sorted([(row['Specialty']) for row in results])
 
-language = Person.query.with_entities(Person.Language).distinct()
+language = Doctor.query.with_entities(Doctor.Language).distinct()
 results2 = list()
 for row in language:
     rowDict = row._asdict()
     results2.append(rowDict)
-language_Choices =sorted( [(row['language']) for row in results2])
+language_Choices = sorted([(row['Language']) for row in results2])
 
 locations = Doctor.query.with_entities(Doctor.CityOfPractice).distinct()
 results3 = list()
 for row in locations:
     rowDict = row._asdict()
     results3.append(rowDict)
-location_Choices =sorted( [(row['locations']) for row in results3])
+location_Choices = sorted([(row['CityOfPractice']) for row in results3])
 
-
-"""
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username',
-                           validators=[DataRequired(), Length(min=2, max=20)])
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()])
+    user_id = IntegerField('ID Number', validators=[DataRequired()])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password',
-                                     validators=[DataRequired(), EqualTo('password')])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
+
+    def validate_user_id(self, user_id):
+        user = Doctor.query.filter_by(DoctorID=user_id.data).first()
+        user2 = Patient.query.filter_by(PatientID=user_id.data).first()
+        if not user and not user2:
+            raise ValidationError('That ID number is invalid. Please enter a valid ID Number.')
 
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
@@ -84,19 +57,15 @@ class RegistrationForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
 
 class UpdateAccountForm(FlaskForm):
-    username = StringField('Username',
-                           validators=[DataRequired(), Length(min=2, max=20)])
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()])
-    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Update')
 
     def validate_username(self, username):
@@ -110,21 +79,13 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('That email is taken. Please choose a different one.')
-"""
+
 
 class SearchForm(FlaskForm):
     specialty = SelectField("Doctor Specialty", choices=specialty_Choices, validators=[DataRequired()])
     language = SelectField("Language", choices=language_Choices, validators=[DataRequired()])
     location = SelectField("Location", choices=location_Choices, validators=[DataRequired()])
     submit = SubmitField('Find a Doctor')
-
-
-
-# class PostForm(FlaskForm):
-#     title = StringField('Title', validators=[DataRequired()])
-#     content = TextAreaField('Content', validators=[DataRequired()])
-#     submit = SubmitField('Post')
-
 
 # class AssignmentUpdateForm(FlaskForm):
 #

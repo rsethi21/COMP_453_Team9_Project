@@ -1,11 +1,11 @@
 import os
 import secrets
-from PIL import Image
+# from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskDemo import app, db, bcrypt
-from flaskDemo.forms import SearchForm
+from flaskDemo.forms import SearchForm,RegistrationForm, LoginForm, UpdateAccountForm
 from flask_login import login_user, current_user, logout_user, login_required
-from flaskDemo.models import Doctor, Patient, Person
+from flaskDemo.models import User, Doctor, Patient, Person
 # from flaskDemo.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, DeptForm,DeptUpdateForm,AssignmentUpdateForm, AssignmentForm
 # from flaskDemo.models import User, Post,Department, Dependent, Dept_Locations, Employee, Project, Works_On
 from datetime import datetime
@@ -14,87 +14,83 @@ from datetime import datetime
 @app.route("/")
 @app.route("/home")
 def home():
-    return render_template('home.html')
+    results = Patient.query.all()
+    return render_template('home.html', outString=results)
 
 @app.route("/search")
-#@login_required
+@login_required
 def searchLoggedIn():
     form = SearchForm()
     if form.validate_on_submit():
-        results2 = Doctor.query.join(Person,Person.Ssn == Doctor.Ssn) \
-        .filter_by(form.Specialty == Doctor.Specialty, form.Language == Person.Language, form.Location == Doctor.CityOfPractice) \
+        results2 = Doctor.query.join(Person, Person.Ssn == Doctor.Ssn) \
+        .filter_by(form.specialty.data == Doctor.Specialty, form.language.data == Doctor.Language, form.location.data == Doctor.CityOfPractice) \
         .add_columns(Person.Firstname, Person.Lastname)
         flash('Redirecting you to Search Results!', 'success')
         return render_template('searchResult.html', title='Providers that Match your Search', joined_m_n=results2)
     return render_template('searchLoggedIn.html', title='Provider Search Criteria', form=form)
     
 
-# @app.route("/searchResult")
-#@login_required
-#def searchResult():
-    
-#    return render_template("searchResult.html")
+@app.route("/searchResult")
+@login_required
+def searchResult():
+   return render_template("searchResult.html")
 
 @app.route("/about")
 def about():
     return render_template('about.html', title='About')
 
 
-#@app.route("/register", methods=['GET', 'POST'])
-#def register():
-#    if current_user.is_authenticated:
-#        return redirect(url_for('home'))
-#    form = RegistrationForm()
-#    if form.validate_on_submit():
-#        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-#        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
-#        db.session.add(user)
-#        db.session.commit()
-#        flash('Your account has been created! You are now able to log in', 'success')
-#        return redirect(url_for('login'))
-#    return render_template('register.html', title='Register', form=form)
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+   if current_user.is_authenticated:
+       return redirect(url_for('home'))
+   form = RegistrationForm()
+   if form.validate_on_submit():
+       hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+       user = User(id=form.user_id.data, username=form.username.data, email=form.email.data, password=hashed_password)
+       db.session.add(user)
+       db.session.commit()
+       flash('Your account has been created! You are now able to log in', 'success')
+       return redirect(url_for('login'))
+   return render_template('register.html', title='Register', form=form)
 
 
-#@app.route("/login", methods=['GET', 'POST'])
-#def login():
-#    if current_user.is_authenticated:
-#        return redirect(url_for('home'))
-#    form = LoginForm()
-#    if form.validate_on_submit():
-#        user = User.query.filter_by(email=form.email.data).first()
-#        if user and bcrypt.check_password_hash(user.password, form.password.data):
-#            login_user(user, remember=form.remember.data)
-#            next_page = request.args.get('next')
-#            return redirect(next_page) if next_page else redirect(url_for('home'))
-#        else:
-#            flash('Login Unsuccessful. Please check email and password', 'danger')
-#    return render_template('login.html', title='Login', form=form)
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+       return redirect(url_for('home'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user, remember=form.remember.data)
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('home'))
+        else:
+            flash('Login Unsuccessful. Please check email and password', 'danger')
+    return render_template('login.html', title='Login', form=form)
 
-#@app.route("/logout")
-#def logout():
-#    logout_user()
-#    return redirect(url_for('home'))
+@app.route("/logout")
+def logout():
+   logout_user()
+   return redirect(url_for('home'))
 
 
-#@app.route("/account", methods=['GET', 'POST'])
-#@login_required
-#def account():
-#    form = UpdateAccountForm()
-#    if form.validate_on_submit():
-#        # if form.picture.data:
-#        #     picture_file = save_picture(form.picture.data)
-#        #     current_user.image_file = picture_file
-#        current_user.username = form.username.data
-#        current_user.email = form.email.data
-#        db.session.commit()
-#        flash('Your account has been updated!', 'success')
-#        return redirect(url_for('account'))
-#    elif request.method == 'GET':
-#        form.username.data = current_user.username
-#        form.email.data = current_user.email
-3    # image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-#    return render_template('account.html', title='Account', form=form)
-                           # image_file=image_file, form=form)
+@app.route("/account", methods=['GET', 'POST'])
+@login_required
+def account():
+    form = UpdateAccountForm()
+    if form.validate_on_submit():
+        # current_user.user_id = form.user_id.data
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        db.session.commit()
+        flash('Your account has been updated!', 'success')
+        return redirect(url_for('account'))
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+    return render_template('account.html', title='Account', form=form)
 
 
 # @app.route("/")
