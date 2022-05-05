@@ -14,21 +14,21 @@ results = list()
 for row in doctor_specialties:
     rowDict = row._asdict()
     results.append(rowDict)
-specialty_Choices = sorted([(row['Specialty']) for row in results])
+specialty_Choices = sorted([(row['Specialty'], row['Specialty']) for row in results])
 
 language = Doctor.query.with_entities(Doctor.Language).distinct()
 results2 = list()
 for row in language:
     rowDict = row._asdict()
     results2.append(rowDict)
-language_Choices = sorted([(row['Language']) for row in results2])
+language_Choices = sorted([(row['Language'], row["Language"]) for row in results2])
 
 locations = Doctor.query.with_entities(Doctor.CityOfPractice).distinct()
 results3 = list()
 for row in locations:
     rowDict = row._asdict()
     results3.append(rowDict)
-location_Choices = sorted([(row['CityOfPractice']) for row in results3])
+location_Choices = sorted([(row['CityOfPractice'], row['CityOfPractice']) for row in results3])
 
 
 class RegistrationForm(FlaskForm):
@@ -82,9 +82,9 @@ class UpdateAccountForm(FlaskForm):
 
 
 class SearchForm(FlaskForm):
-    specialty = SelectField("Doctor Specialty", choices=specialty_Choices, validators=[DataRequired()])
-    language = SelectField("Language", choices=language_Choices, validators=[DataRequired()])
-    location = SelectField("Location", choices=location_Choices, validators=[DataRequired()])
+    specialty = SelectField("Doctor Specialty", choices=specialty_Choices)
+    language = SelectField("Language", choices=language_Choices)
+    location = SelectField("Location", choices=location_Choices)
     submit = SubmitField('Find a Doctor')
 
 # class AssignmentUpdateForm(FlaskForm):

@@ -14,26 +14,21 @@ from datetime import datetime
 @app.route("/")
 @app.route("/home")
 def home():
-    results = Patient.query.all()
-    return render_template('home.html', outString=results)
+    return render_template('home.html')
 
-@app.route("/search")
+
+@app.route("/search", methods=['GET', 'POST'])
 @login_required
 def searchLoggedIn():
     form = SearchForm()
     if form.validate_on_submit():
-        results2 = Doctor.query.join(Person, Person.Ssn == Doctor.Ssn) \
-        .filter_by(form.specialty.data == Doctor.Specialty, form.language.data == Doctor.Language, form.location.data == Doctor.CityOfPractice) \
-        .add_columns(Person.Firstname, Person.Lastname)
+        results = Person.query.join(Doctor, Doctor.Ssn == Person.Ssn) \
+            .filter_by(Specialty=form.specialty.data, Language=form.language.data, CityOfPractice=form.location.data) \
+            .add_columns(Doctor.Ssn, Doctor.Specialty, Person.FirstName, Person.LastName, Doctor.CityOfPractice)
         flash('Redirecting you to Search Results!', 'success')
-        return render_template('searchResult.html', title='Providers that Match your Search', joined_m_n=results2)
+        return render_template('searchResult.html', title='Providers that Match your Search', results=results)
     return render_template('searchLoggedIn.html', title='Provider Search Criteria', form=form)
-    
 
-@app.route("/searchResult")
-@login_required
-def searchResult():
-   return render_template("searchResult.html")
 
 @app.route("/about")
 def about():
@@ -42,23 +37,23 @@ def about():
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
-   if current_user.is_authenticated:
-       return redirect(url_for('home'))
-   form = RegistrationForm()
-   if form.validate_on_submit():
-       hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-       user = User(id=form.user_id.data, username=form.username.data, email=form.email.data, password=hashed_password)
-       db.session.add(user)
-       db.session.commit()
-       flash('Your account has been created! You are now able to log in', 'success')
-       return redirect(url_for('login'))
-   return render_template('register.html', title='Register', form=form)
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(id=form.user_id.data, username=form.username.data, email=form.email.data, password=hashed_password)
+        db.session.add(user)
+        db.session.commit()
+        flash('Your account has been created! You are now able to log in', 'success')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
 
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-       return redirect(url_for('home'))
+        return redirect(url_for('home'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -70,10 +65,11 @@ def login():
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)
 
+
 @app.route("/logout")
 def logout():
-   logout_user()
-   return redirect(url_for('home'))
+    logout_user()
+    return redirect(url_for('home'))
 
 
 @app.route("/account", methods=['GET', 'POST'])
@@ -81,7 +77,6 @@ def logout():
 def account():
     form = UpdateAccountForm()
     if form.validate_on_submit():
-        # current_user.user_id = form.user_id.data
         current_user.username = form.username.data
         current_user.email = form.email.data
         db.session.commit()
@@ -91,6 +86,17 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
     return render_template('account.html', title='Account', form=form)
+
+
+@app.route("/account/delete", methods=['POST'])
+@login_required
+def delete_account():
+    user_id = current_user.id
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash('Your account has been deleted!', 'success')
+    return redirect(url_for('home'))
 
 
 # @app.route("/")

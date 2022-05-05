@@ -1,13 +1,14 @@
 {% extends "layout.html" %}
 {% block content %}
-	  {% for row in joined_m_n %}
-        <article class="media content-section">
-          <div class="media-body">
-            <div class="article-metadata">
-              <a class="mr-2" href="{{ url_for('searchLoggedIn')}}">{{ row }}</a> <br/>
-              <small class="text-muted">{{ row['lastname'] }} {{ row['firstname'] }}</small>
-            </div>
-          </div>
-        </article>
-     {% endfor %}
+    {{ title }}
+        {% for row in results %}
+            <article class="media content-section">
+              <div class="media-body">
+                <div class="article-metadata">
+{#                  <a class="mr-2" href="#">{{ row }}</a>#}
+                  <strong class="text-muted">{{ row['FirstName'] }} {{ row['LastName'] }}, {{ row['Specialty'] }}, {{ row['CityOfPractice'] }}</strong>
+                </div>
+              </div>
+            </article>
+         {% endfor %}
 {% endblock content %}
